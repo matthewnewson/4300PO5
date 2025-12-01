@@ -17,6 +17,7 @@ import random
 import busters
 import game
 
+
 from util import manhattanDistance, raiseNotDefined
 
 
@@ -75,7 +76,17 @@ class DiscreteDistribution(dict):
         {}
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        total = self.total()
+        if total==0:
+            return
+        for key in self:
+            self[key] = self[key]/total
+
+        
+        
+        
+
+        
 
     def sample(self):
         """
@@ -99,7 +110,17 @@ class DiscreteDistribution(dict):
         0.0
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        total = self.total()
+        sample_prob = random.random()*total
+        threshold = 0.0
+        for key,num in self.items():
+            threshold+=num
+            if(threshold > sample_prob):
+                return key
+            
+
+
+        
 
 
 class InferenceModule:
@@ -169,7 +190,18 @@ class InferenceModule:
         Return the probability P(noisyDistance | pacmanPosition, ghostPosition).
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        if noisyDistance is None:
+            if ghostPosition == jailPosition:
+                return 1.0   
+            else:
+                return 0.0 
+        
+        if ghostPosition == jailPosition:
+            return 0.0
+        
+        true_distance = manhattanDistance(pacmanPosition,ghostPosition)
+        return busters.getObservationProbability(noisyDistance,true_distance)
+
 
     def setGhostPosition(self, gameState, ghostPosition, index):
         """
@@ -277,7 +309,15 @@ class ExactInference(InferenceModule):
         position is known.
         """
         "*** YOUR CODE HERE ***"
-        raiseNotDefined()
+        
+        pacman_position = gameState.getPacmanPosition()
+        jail_position = self.getJailPosition()
+        noisy_distance = observation
+
+        for ghost_pos in self.allPositions:
+            likelihood = self.getObservationProb(noisy_distance, pacman_position, ghost_pos, jail_position)
+            self.beliefs[ghost_pos] = self.beliefs[ghost_pos]*likelihood
+
 
         self.beliefs.normalize()
 
